@@ -51,6 +51,10 @@ impl Handle {
         fn configure(handle: Handle) -> Handle { handle }
     }
 
+    pub fn inner_mut(&mut self) -> &mut Easy {
+        &mut self.easy
+    }
+
     pub fn timeout(mut self, ms: usize) -> Handle {
         self.easy.setopt(opt::TIMEOUT_MS, ms).unwrap();
         self

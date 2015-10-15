@@ -21,7 +21,7 @@ pub struct Easy {
 impl Easy {
     pub fn new() -> Easy {
         // Ensure that curl is globally initialized
-        setup_cleanup_handler();
+        global_init_and_setup_cleanup_handler();
 
         let handle = unsafe {
             let p = ffi::curl_easy_init();
@@ -114,12 +114,12 @@ impl Easy {
 }
 
 #[repr(isize)]
-pub enum GlobalInitFlag {
+enum GlobalInitFlag {
     Nothing = ffi::CURL_GLOBAL_NOTHING as isize,
     Default = ffi::CURL_GLOBAL_DEFAULT as isize,
 }
 
-pub fn global_init(flags: GlobalInitFlag) -> Result<(), ErrCode> {
+fn global_init(flags: GlobalInitFlag) -> Result<(), ErrCode> {
     let res = ErrCode(unsafe {
         ffi::curl_global_init(flags as isize as c_long)
     });
@@ -132,16 +132,15 @@ pub fn global_init(flags: GlobalInitFlag) -> Result<(), ErrCode> {
     }
 }
 
-pub fn global_cleanup() {
-    unsafe { ffi::curl_global_cleanup() }
-}
-
 #[inline]
-fn setup_cleanup_handler() {
+fn global_init_and_setup_cleanup_handler() {
     // Schedule curl to be cleaned up after we're done with this whole process
     static INIT: Once = ONCE_INIT;
-    INIT.call_once(|| unsafe {
-        assert_eq!(libc::atexit(cleanup), 0);
+    INIT.call_once(|| {
+        global_init(GlobalInitFlag::Nothing).unwrap();
+        unsafe {
+            assert_eq!(libc::atexit(cleanup), 0);
+        }
     });
 
     extern fn cleanup() {
