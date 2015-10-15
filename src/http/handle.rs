@@ -21,10 +21,14 @@ pub struct Handle {
 }
 
 impl Handle {
-    pub fn new() -> Handle {
-        return configure(Handle { easy: Easy::new() }
+    pub fn new_without_ssl_probe() -> Self {
+        Handle { easy: Easy::new() }
             .timeout(DEFAULT_TIMEOUT_MS)
-            .connect_timeout(DEFAULT_TIMEOUT_MS));
+            .connect_timeout(DEFAULT_TIMEOUT_MS)
+    }
+
+    pub fn new() -> Handle {
+        return configure(Self::new_without_ssl_probe());
 
         #[cfg(all(unix, not(target_os = "macos")))]
         fn configure(mut handle: Handle) -> Handle {

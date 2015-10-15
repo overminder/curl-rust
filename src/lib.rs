@@ -9,6 +9,9 @@ extern crate curl_sys as curl_ffi;
 #[cfg(all(unix, not(target_os = "macos")))]
 extern crate openssl_sys as openssl;
 
+#[cfg(unix)]
+extern crate openssl as openssl_rust;
+
 pub use ffi::easy::ProgressCb;
 pub use ffi::err::ErrCode;
 

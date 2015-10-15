@@ -9,6 +9,7 @@ use super::{consts, err, info, opt};
 use super::err::ErrCode;
 use http::body::Body;
 use http::{header, Response};
+use openssl_rust::ssl::{SslContext, SslMethod};
 
 use curl_ffi as ffi;
 
@@ -137,7 +138,11 @@ fn global_init_and_setup_cleanup_handler() {
     // Schedule curl to be cleaned up after we're done with this whole process
     static INIT: Once = ONCE_INIT;
     INIT.call_once(|| {
+        // To init openssl.
+        let _ssl_ctx = SslContext::new(SslMethod::Sslv23);
+
         global_init(GlobalInitFlag::Nothing).unwrap();
+
         unsafe {
             assert_eq!(libc::atexit(cleanup), 0);
         }
