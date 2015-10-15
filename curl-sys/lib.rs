@@ -59,6 +59,9 @@ impl Clone for curl_version_info_data {
 
 pub const CURL_READFUNC_ABORT: c_int = 0x10000000;
 
+pub const CURL_GLOBAL_NOTHING: c_long = 0;
+pub const CURL_GLOBAL_DEFAULT: c_long = 3;
+
 pub const CURLINFO_STRING: c_int   = 0x100000;
 pub const CURLINFO_LONG: c_int     = 0x200000;
 pub const CURLINFO_DOUBLE: c_int   = 0x300000;
@@ -474,6 +477,7 @@ extern {
     pub fn curl_easy_perform(curl: *mut CURL) -> CURLcode;
     pub fn curl_easy_cleanup(curl: *mut CURL);
     pub fn curl_easy_getinfo(curl: *const CURL, info: CURLINFO, ...) -> CURLcode;
+    pub fn curl_global_init(flags: c_long) -> CURLcode;
     pub fn curl_global_cleanup();
 
     pub fn curl_slist_append(list: *mut curl_slist,

@@ -20,5 +20,5 @@ pub use ffi::version::{
     Protocols
 };
 
-mod ffi;
+pub mod ffi;
 pub mod http;
