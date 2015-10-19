@@ -16,6 +16,8 @@ use self::BodyType::{Fixed, Chunked};
 
 const DEFAULT_TIMEOUT_MS: usize = 30_000;
 
+pub type CurlResult<A> = Result<A, ErrCode>;
+
 pub struct Handle {
     easy: Easy,
 }
@@ -91,9 +93,14 @@ impl Handle {
         self
     }
 
-    pub fn ssl_verifypeer(mut self, value: bool) -> Handle {
-        self.easy.setopt(opt::SSL_VERIFYPEER, value).unwrap();
-        self
+    pub fn ssl_verifypeer(&mut self, value: bool) -> CurlResult<&mut Handle> {
+        try!(self.easy.setopt(opt::SSL_VERIFYPEER, value));
+        Ok(self)
+    }
+
+    pub fn ssl_verifyhost(&mut self, value: isize) -> CurlResult<&mut Handle> {
+        try!(self.easy.setopt(opt::SSL_VERIFYHOST, value));
+        Ok(self)
     }
 
     pub fn follow_location(mut self, value: isize) -> Handle {
@@ -111,12 +118,12 @@ impl Handle {
         self
     }
 
-    pub fn proxy<U: ToUrl>(mut self, proxy: U) -> Handle {
-        proxy.with_url_str(|s| {
-            self.easy.setopt(opt::PROXY, s).unwrap();
-        });
+    pub fn proxy<U: ToUrl>(&mut self, proxy: U) -> CurlResult<&mut Handle> {
+        try!(proxy.with_url_str(|s| {
+            self.easy.setopt(opt::PROXY, s)
+        }));
 
-        self
+        Ok(self)
     }
 
     pub fn ssl_ca_path(mut self, path: &Path) -> Handle {
@@ -423,24 +430,28 @@ fn append_header(map: &mut HashMap<String, Vec<String>>, key: &str, val: &str) {
 }
 
 pub trait ToUrl{
-    fn with_url_str<F>(self, f: F) where F: FnOnce(&str);
+    fn with_url_str<A, F>(self, f: F) -> A
+        where F: FnOnce(&str) -> A;
 }
 
 impl<'a> ToUrl for &'a str {
-    fn with_url_str<F>(self, f: F) where F: FnOnce(&str) {
-        f(self);
+    fn with_url_str<A, F>(self, f: F) -> A
+        where F: FnOnce(&str) -> A {
+        f(self)
     }
 }
 
 impl<'a> ToUrl for &'a Url {
-    fn with_url_str<F>(self, f: F) where F: FnOnce(&str) {
-        self.to_string().with_url_str(f);
+    fn with_url_str<A, F>(self, f: F) -> A
+        where F: FnOnce(&str) -> A {
+        self.to_string().with_url_str(f)
     }
 }
 
 impl ToUrl for String {
-    fn with_url_str<F>(self, f: F) where F: FnOnce(&str) {
-        self[..].with_url_str(f);
+    fn with_url_str<A, F>(self, f: F) -> A
+        where F: FnOnce(&str) -> A {
+        self[..].with_url_str(f)
     }
 }
 
