@@ -22,17 +22,19 @@ fn main() {
     let dst = PathBuf::from(env::var_os("OUT_DIR").unwrap());
     let windows = target.contains("windows");
 
-    // OSX ships libcurl by default, so we just use that version
-    // unconditionally.
-    if target.contains("apple") {
-        return println!("cargo:rustc-flags=-l curl");
-    }
-
     // Next, fall back and try to use pkg-config if its available.
     match pkg_config::find_library("libcurl") {
         Ok(..) => return,
         Err(e) => println!("Couldn't find libcurl from \
                            pkgconfig ({:?}), compiling it from source...", e),
+    }
+
+    // OSX ships libcurl by default, so we just use that version
+    // unconditionally.
+    // We do this after pkg_config since in this way we allow the user
+    // to override the default libcurl in OSX.
+    if target.contains("apple") {
+        return println!("cargo:rustc-flags=-l curl");
     }
 
     println!("cargo:rustc-link-search={}/lib", dst.display());
