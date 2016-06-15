@@ -66,16 +66,16 @@ impl Easy {
             };
 
             // Set callback options
-            ffi::curl_easy_setopt(self.curl, opt::READFUNCTION, curl_read_fn);
+            ffi::curl_easy_setopt(self.curl, opt::READFUNCTION, curl_read_fn as usize);
             ffi::curl_easy_setopt(self.curl, opt::READDATA, body_p);
 
-            ffi::curl_easy_setopt(self.curl, opt::WRITEFUNCTION, curl_write_fn);
+            ffi::curl_easy_setopt(self.curl, opt::WRITEFUNCTION, curl_write_fn as usize);
             ffi::curl_easy_setopt(self.curl, opt::WRITEDATA, resp_p);
 
-            ffi::curl_easy_setopt(self.curl, opt::HEADERFUNCTION, curl_header_fn);
+            ffi::curl_easy_setopt(self.curl, opt::HEADERFUNCTION, curl_header_fn as usize);
             ffi::curl_easy_setopt(self.curl, opt::HEADERDATA, resp_p);
 
-            ffi::curl_easy_setopt(self.curl, opt::PROGRESSFUNCTION, curl_progress_fn);
+            ffi::curl_easy_setopt(self.curl, opt::PROGRESSFUNCTION, curl_progress_fn as usize);
             ffi::curl_easy_setopt(self.curl, opt::PROGRESSDATA, progress_p);
         }
 
@@ -139,7 +139,7 @@ fn global_init_and_setup_cleanup_handler() {
     static INIT: Once = ONCE_INIT;
     INIT.call_once(|| {
         // To init openssl.
-        let _ssl_ctx = SslContext::new(SslMethod::Sslv23);
+        let _ssl_ctx = SslContext::new(SslMethod::Tlsv1_2);
 
         global_init(GlobalInitFlag::Nothing).unwrap();
 
