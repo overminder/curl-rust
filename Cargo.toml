@@ -11,7 +11,7 @@ description = "Rust bindings to libcurl for making HTTP requests"
 url = "1.2.0"
 log = "0.3.0"
 libc = "0.2.15"
-curl-sys = { path = "curl-sys", version = "0.1.0" }
+curl-sys = { path = "curl-sys", version = "=0.1.32" }
 # So that we can use the local repos with the exact versions.
 openssl = "=0.7.5"
 openssl-sys = "=0.7.5"
